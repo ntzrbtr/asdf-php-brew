@@ -2,9 +2,11 @@
 
 # asdf-php-brew [![Build](https://github.com/ntzrbtr/asdf-php-brew/actions/workflows/build.yml/badge.svg)](https://github.com/ntzrbtr/asdf-php-brew/actions/workflows/build.yml) [![Lint](https://github.com/ntzrbtr/asdf-php-brew/actions/workflows/lint.yml/badge.svg)](https://github.com/ntzrbtr/asdf-php-brew/actions/workflows/lint.yml)
 
-[php-brew](https://github.com/ntzrbtr/asdf-php-brew) plugin for the [asdf version manager](https://asdf-vm.com).
+[PHP](https://www.php.net/) plugin for the [asdf version manager](https://asdf-vm.com/) or [mise](https://mise.jdx.dev/); uses [Homebrew](https://brew.sh/) for PHP installation instead of compiling PHP.
 
 </div>
+
+Throughout the use of this documentation, whenever `asdf` as a command is used, `mise` should work as well.
 
 # Contents
 
@@ -15,39 +17,31 @@
 
 # Dependencies
 
-**TODO: adapt this section**
-
-- `bash`, `curl`, `tar`, and [POSIX utilities](https://pubs.opengroup.org/onlinepubs/9699919799/idx/utilities.html).
-- `SOME_ENV_VAR`: set this environment variable in your shell config to load the correct version of tool x.
+- [curl](https://curl.se/)
+- [Homebrew](https://brew.sh/)
 
 # Install
 
 Plugin:
 
 ```shell
-asdf plugin add php-brew
-# or
-asdf plugin add php-brew https://github.com/ntzrbtr/asdf-php-brew.git
+asdf plugin add php https://github.com/ntzrbtr/asdf-php-brew.git
 ```
 
-php-brew:
+PHP:
 
 ```shell
 # Show all installable versions
-asdf list-all php-brew
+asdf list-all php
 
 # Install specific version
-asdf install php-brew latest
+asdf install php 8.2
 
 # Set a version globally (on your ~/.tool-versions file)
-asdf global php-brew latest
-
-# Now php-brew commands are available
-php-brew --help
+asdf global php 8.2
 ```
 
-Check [asdf](https://github.com/asdf-vm/asdf) readme for more instructions on how to
-install & manage versions.
+Check [asdf](https://github.com/asdf-vm/asdf) readme for more instructions on how to install & manage versions.
 
 # Contributing
 
