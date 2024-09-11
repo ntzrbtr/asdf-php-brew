@@ -2,73 +2,178 @@
 
 set -euo pipefail
 
-# TODO: Ensure this is the correct GitHub homepage where releases can be downloaded for php-brew.
-GH_REPO="https://github.com/ntzrbtr/asdf-php-brew"
-TOOL_NAME="php-brew"
-TOOL_TEST="php-brew --help"
+# Default version of PHP in https://github.com/shivammathur/homebrew-php - change this if the default version changes
+DEFAULT_VERSION="8.3"
 
+# Print error message and exit
 fail() {
-	echo -e "asdf-$TOOL_NAME: $*"
+	echo -e "asdf-php-brew: $*"
 	exit 1
 }
 
-curl_opts=(-fsSL)
-
-# NOTE: You might want to remove this if php-brew is not hosted on GitHub releases.
-if [ -n "${GITHUB_API_TOKEN:-}" ]; then
-	curl_opts=("${curl_opts[@]}" -H "Authorization: token $GITHUB_API_TOKEN")
-fi
-
-sort_versions() {
-	sed 'h; s/[+-]/./g; s/.p\([[:digit:]]\)/.z\1/; s/$/.z/; G; s/\n/ /' |
-		LC_ALL=C sort -t. -k 1,1 -k 2,2n -k 3,3n -k 4,4n -k 5,5n | awk '{print $2}'
+# Print help overview
+help_overview() {
+	echo "PHP plugin which uses Homebrew for PHP installation instead of compiling PHP."
 }
 
-list_github_tags() {
-	git ls-remote --tags --refs "$GH_REPO" |
-		grep -o 'refs/tags/.*' | cut -d/ -f3- |
-		sed 's/^v//' # NOTE: You might want to adapt this sed to remove non-version strings from tags
+# List dependencies
+list_dependencies() {
+	echo "curl"
+	echo "Homebrew"
 }
 
+# Check dependencies
+check_dependencies() {
+	# Check if curl is installed
+  	if ! command -v curl >/dev/null; then
+    	fail "curl is required but not installed. Please install curl first."
+  	fi
+
+	# Check if Homebrew is installed
+  	if ! command -v brew >/dev/null; then
+    	fail "Homebrew is required but not installed. Please install Homebrew first."
+  	fi
+
+	# Add shivammathur/php tap if not already added
+	brew tap shivammathur/php
+}
+
+# Get all available versions of PHP
+get_all_versions() {
+	# Get all versions of PHP available in the tap
+	mapfile -t tmp < <(brew search "/shivammathur/php/php" | sed 's/shivammathur\/php\///g')
+
+	# Now add the default version to the ones without an '@' symbol
+	versions=()
+	for version in "${tmp[@]}"; do
+		if [[ $version == *@* ]]; then
+			versions+=("$version")
+		else
+			versions+=("$(echo $version | sed "s/php/php@$DEFAULT_VERSION/")")
+		fi
+	done
+
+	# Now strip the 'php@' part from the versions
+	versions=("${versions[@]//php@/}")
+
+	# Sort the array
+	IFS=$'\n' versions=($(sort <<<"${versions[*]}"))
+
+	# Print versions line by line
+	printf '%s\n' "${versions[@]}"
+}
+
+# Check if a version of PHP exists
+check_version_exists() {
+	local version="$1"
+
+	mapfile -t versions < <(get_all_versions)
+
+	for item in "${versions[@]}"; do
+		if [[ "$item" == "$version" ]]; then
+			return
+		fi
+	done
+
+	fail "PHP ${version} is not available."
+}
+
+# Check if a version of PHP is installed
+check_version_installed() {
+	local version="$1"
+
+	if brew list --full-name | grep -q "^shivammathur/php/php@${version}$"; then
+		return
+	else
+		fail "PHP ${version} is not installed."
+	fi
+}
+
+# List all available versions of PHP
 list_all_versions() {
-	# TODO: Adapt this. By default we simply list the tag names from GitHub releases.
-	# Change this function if php-brew has other means of determining installable versions.
-	list_github_tags
+	mapfile -t versions < <(get_all_versions)
+	printf '%s ' "${versions[@]}"
 }
 
-download_release() {
-	local version filename url
-	version="$1"
-	filename="$2"
-
-	# TODO: Adapt the release URL convention for php-brew
-	url="$GH_REPO/archive/v${version}.tar.gz"
-
-	echo "* Downloading $TOOL_NAME release $version..."
-	curl "${curl_opts[@]}" -o "$filename" -C - "$url" || fail "Could not download $url"
-}
-
+# Install a version of PHP
 install_version() {
 	local install_type="$1"
 	local version="$2"
 	local install_path="${3%/bin}/bin"
 
-	if [ "$install_type" != "version" ]; then
-		fail "asdf-$TOOL_NAME supports release installs only"
+	if brew install "shivammathur/php/php@${version}"; then
+		mkdir -p "${install_path}"
+
+		for bin in php pecl; do
+			ln -s "$(brew --prefix)/opt/php@${version}/bin/${bin}" "${install_path}/${bin}"
+			test -x "$install_path/$bin" || fail "Expected $install_path/$bin to be executable."
+		done
+
+		echo "PHP ${version} has been installed successfully."
+	else
+		fail "Failed to install PHP ${version}."
+	fi
+}
+
+# Install Composer for a version of PHP
+install_composer() {
+	local version="$1"
+	local install_path="${2%/bin}/bin"
+
+	# Determine the correct checksum command
+	if command -v sha256sum > /dev/null 2>&1; then
+		checksum_cmd="sha256sum"
+	elif command -v shasum > /dev/null 2>&1; then
+		checksum_cmd="shasum -a 256"
+	else
+		fail "Neither sha256sum nor shasum found. Exiting."
 	fi
 
-	(
-		mkdir -p "$install_path"
-		cp -r "$ASDF_DOWNLOAD_PATH"/* "$install_path"
+	# Create a temporary directory
+	temp_dir=$(mktemp -d)
 
-		# TODO: Assert php-brew executable exists.
-		local tool_cmd
-		tool_cmd="$(echo "$TOOL_TEST" | cut -d' ' -f1)"
-		test -x "$install_path/$tool_cmd" || fail "Expected $install_path/$tool_cmd to be executable."
+	# Change to the temporary directory
+	cd "$temp_dir" || exit 1
 
-		echo "$TOOL_NAME $version installation was successful!"
-	) || (
-		rm -rf "$install_path"
-		fail "An error occurred while installing $TOOL_NAME $version."
-	)
+	# Download the file
+	if ! curl -sO "https://getcomposer.org/download/latest-stable/composer.phar"; then
+		cd - && rm -rf "$temp_dir"
+		fail "Downloading Composer failed."
+	fi
+
+	# Download the checksum file
+	echo "Downloading checksum..."
+	if ! curl -sO "https://getcomposer.org/download/latest-stable/composer.phar.sha256sum"; then
+		cd - && rm -rf "$temp_dir"
+		fail "Checksum checksum for Composer failed."
+	fi
+
+	# Verify the checksum
+	echo "Verifying checksum..."
+	if $checksum_cmd -c *.sha256sum; then
+		mv composer.phar "$install_path/composer"
+	else
+		cd - && rm -rf "$temp_dir"
+		fail "Checksum verification failed. The file may be corrupted or tampered with."
+	fi
+
+	# Clean up: remove temporary directory
+	cd - && rm -rf "$temp_dir"
+
+	echo "Composer has has been installed successfully for PHP ${version}."
+}
+
+# Uninstall a version of PHP
+uninstall_version() {
+	local install_type="$1"
+	local version="$2"
+	local install_path="${3%/bin}/bin"
+
+	if brew uninstall "shivammathur/php/php@${version}"; then
+		rm -rf "${install_path}"
+
+		echo "PHP ${version} has been uninstalled successfully."
+	else
+		fail "Failed to uninstall PHP ${version}."
+	fi
 }

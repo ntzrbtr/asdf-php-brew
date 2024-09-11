@@ -10,8 +10,6 @@ source "${plugin_dir}/lib/utils.bash"
 
 check_dependencies
 
-check_version_exists "$ASDF_INSTALL_VERSION"
+check_version_installed "$ASDF_INSTALL_VERSION"
 
-install_version "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
-
-install_composer "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+uninstall_version "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
