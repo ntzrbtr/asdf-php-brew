@@ -20,7 +20,7 @@ jobs:
       - uses: asdf-vm/actions/setup@v3
       - uses: actions/checkout@v4
       - name: install_plugin
-        run: mv $GITHUB_WORKSPACE ~/.asdf/plugins/php
+        run: mkdir -p ~/.asdf/plugins/ && mv "$GITHUB_WORKSPACE" ~/.asdf/plugins/php
       - name: require_php
         run: echo "php 8.3" > ~/.tool-versions
       - name: install_php
