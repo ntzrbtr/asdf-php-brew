@@ -24,7 +24,7 @@ jobs:
       - name: require_php
         run: echo "php 8.3" > ~/.tool-versions
       - name: install_php
-        run: asdf install php@8.3
+        run: asdf install php 8.3
       - name: test_php
         run: |
           required_version="8.3" && \
