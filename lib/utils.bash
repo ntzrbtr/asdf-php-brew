@@ -97,9 +97,8 @@ list_all_versions() {
 
 # Install a version of PHP
 install_version() {
-	local install_type="$1"
-	local version="$2"
-	local install_path="${3%/bin}/bin"
+	local version="$1"
+	local install_path="${2%/bin}/bin"
 
 	if brew install "shivammathur/php/php@${version}"; then
 		mkdir -p "${install_path}"
@@ -165,9 +164,8 @@ install_composer() {
 
 # Uninstall a version of PHP
 uninstall_version() {
-	local install_type="$1"
-	local version="$2"
-	local install_path="${3%/bin}/bin"
+	local version="$1"
+	local install_path="${2%/bin}/bin"
 
 	if brew uninstall "shivammathur/php/php@${version}"; then
 		rm -rf "${install_path}"

@@ -12,4 +12,4 @@ check_dependencies
 
 check_version_installed "$ASDF_INSTALL_VERSION"
 
-uninstall_version "$ASDF_INSTALL_TYPE" "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
+uninstall_version "$ASDF_INSTALL_VERSION" "$ASDF_INSTALL_PATH"
