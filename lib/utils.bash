@@ -49,7 +49,7 @@ get_all_versions() {
 		if [[ $version == *@* ]]; then
 			versions+=("$version")
 		else
-			versions+=("$(echo $version | sed "s/php/php@$DEFAULT_VERSION/")")
+			versions+=("${version/php/php@$DEFAULT_VERSION}")
 		fi
 	done
 
