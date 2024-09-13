@@ -25,14 +25,14 @@ list_dependencies() {
 # Check dependencies
 check_dependencies() {
 	# Check if curl is installed
-  	if ! command -v curl >/dev/null; then
-    	fail "curl is required but not installed. Please install curl first."
-  	fi
+	if ! command -v curl >/dev/null; then
+		fail "curl is required but not installed. Please install curl first."
+	fi
 
 	# Check if Homebrew is installed
-  	if ! command -v brew >/dev/null; then
-    	fail "Homebrew is required but not installed. Please install Homebrew first."
-  	fi
+	if ! command -v brew >/dev/null; then
+		fail "Homebrew is required but not installed. Please install Homebrew first."
+	fi
 
 	# Add shivammathur/php tap if not already added
 	brew tap shivammathur/php
@@ -121,9 +121,9 @@ install_composer() {
 	local install_path="${2%/bin}/bin"
 
 	# Determine the correct checksum command
-	if command -v sha256sum > /dev/null 2>&1; then
+	if command -v sha256sum >/dev/null 2>&1; then
 		checksum_cmd="sha256sum"
-	elif command -v shasum > /dev/null 2>&1; then
+	elif command -v shasum >/dev/null 2>&1; then
 		checksum_cmd="shasum -a 256"
 	else
 		fail "Neither sha256sum nor shasum found. Exiting."
