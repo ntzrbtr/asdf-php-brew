@@ -41,7 +41,10 @@ check_dependencies() {
 # Get all available versions of PHP
 get_all_versions() {
 	# Get all versions of PHP available in the tap
-	mapfile -t tmp < <(brew search "/shivammathur/php/php" | sed 's/shivammathur\/php\///g')
+	tmp=()
+	while IFS= read -r line; do
+		tmp+=("$line")
+	done < <(brew search "/shivammathur/php/php" | sed 's/shivammathur\/php\///g')
 
 	# Now add the default version to the ones without an '@' symbol
 	versions=()
@@ -57,7 +60,11 @@ get_all_versions() {
 	versions=("${versions[@]//php@/}")
 
 	# Sort the array
-	mapfile -t versions < <(printf '%s\n' "${versions[@]}" | sort)
+	versions_sorted=()
+	while IFS= read -r line; do
+		versions_sorted+=("$line")
+	done < <(printf '%s\n' "${versions[@]}" | sort)
+	versions=("${versions_sorted[@]}")
 
 	# Print versions line by line
 	printf '%s\n' "${versions[@]}"
@@ -67,7 +74,10 @@ get_all_versions() {
 check_version_exists() {
 	local version="$1"
 
-	mapfile -t versions < <(get_all_versions)
+	versions=()
+	while IFS= read -r line; do
+		versions+=("$line")
+	done < <(get_all_versions)
 
 	for item in "${versions[@]}"; do
 		if [[ "$item" == "$version" ]]; then
@@ -91,7 +101,11 @@ check_version_installed() {
 
 # List all available versions of PHP
 list_all_versions() {
-	mapfile -t versions < <(get_all_versions)
+	versions=()
+	while IFS= read -r line; do
+		versions+=("$line")
+	done < <(get_all_versions)
+
 	printf '%s ' "${versions[@]}"
 }
 
