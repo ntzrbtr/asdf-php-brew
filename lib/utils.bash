@@ -149,7 +149,7 @@ install_composer() {
 
 	# Verify the checksum
 	echo "Verifying checksum..."
-	if $checksum_cmd -c *.sha256sum; then
+	if $checksum_cmd -c composer.phar.sha256sum; then
 		mv composer.phar "$install_path/composer"
 	else
 		cd - && rm -rf "$temp_dir"
