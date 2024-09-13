@@ -18,10 +18,9 @@ jobs:
     steps:
       - uses: Homebrew/actions/setup-homebrew@master
       - uses: asdf-vm/actions/setup@v3
-      - name: checkout_plugin
-        uses: actions/checkout@v4
-        with:
-          path: ~/.asdf/plugins/php
+      - uses: actions/checkout@v4
+      - name: install_plugin
+        run: mv $GITHUB_WORKSPACE ~/.asdf/plugins/php
       - name: require_php
         run: echo "php 8.3" > ~/.tool-versions
       - name: install_php
