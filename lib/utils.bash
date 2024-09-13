@@ -57,7 +57,7 @@ get_all_versions() {
 	versions=("${versions[@]//php@/}")
 
 	# Sort the array
-	IFS=$'\n' versions=($(sort <<<"${versions[*]}"))
+	mapfile -t versions < <(printf '%s\n' "${versions[@]}" | sort)
 
 	# Print versions line by line
 	printf '%s\n' "${versions[@]}"
