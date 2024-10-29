@@ -161,7 +161,7 @@ install_composer() {
 		fail "Checksum checksum for Composer failed."
 	fi
 
-	# Verify the checksum
+	# Verify the checksum and move binary into place
 	echo "Verifying checksum..."
 	if $checksum_cmd -c composer.phar.sha256sum; then
 		mv composer.phar "$install_path/composer"
@@ -169,6 +169,9 @@ install_composer() {
 		cd - && rm -rf "$temp_dir"
 		fail "Checksum verification failed. The file may be corrupted or tampered with."
 	fi
+
+	# Create install directory for composer stuff
+	mkdir -p "${2%/bin}/.composer"
 
 	# Clean up: remove temporary directory
 	cd - && rm -rf "$temp_dir"
