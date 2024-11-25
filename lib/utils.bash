@@ -165,6 +165,7 @@ install_composer() {
 	echo "Verifying checksum..."
 	if $checksum_cmd -c composer.phar.sha256sum; then
 		mv composer.phar "$install_path/composer"
+		chmod +x "$install_path/composer"
 	else
 		cd - && rm -rf "$temp_dir"
 		fail "Checksum verification failed. The file may be corrupted or tampered with."
