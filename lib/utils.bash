@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # Default version of PHP in https://github.com/shivammathur/homebrew-php - change this if the default version changes
-DEFAULT_VERSION="8.3"
+DEFAULT_VERSION="8.4"
 
 # Print error message and exit
 fail() {
