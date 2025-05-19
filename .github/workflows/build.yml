@@ -17,7 +17,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: Homebrew/actions/setup-homebrew@master
-      - uses: asdf-vm/actions/setup@v3
+      - uses: asdf-vm/actions/setup@v4
       - uses: actions/checkout@v4
       - name: install_plugin
         run: mkdir -p ~/.asdf/plugins/ && cp -R "$GITHUB_WORKSPACE" ~/.asdf/plugins/php
