@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: Homebrew/actions/setup-homebrew@master
       - uses: asdf-vm/actions/setup@v4
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: install_plugin
         run: mkdir -p ~/.asdf/plugins/ && cp -R "$GITHUB_WORKSPACE" ~/.asdf/plugins/php
       - name: require_php
